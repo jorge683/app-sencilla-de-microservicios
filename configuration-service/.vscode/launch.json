@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ConfigurationServiceApplication<centralized-configuration-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "com.example.configurationservice.ConfigurationServiceApplication",
+            "projectName": "centralized-configuration-service",
+            "args": ""
+        }
+    ]
+}

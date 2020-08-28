@@ -1,0 +1,118 @@
+version: '3.3'
+services:
+
+  kangaroo:
+    container_name: kangaroo
+    image: 'jr/kangaroo'
+    build:
+        context: ./kangaroo
+        dockerfile: Dockerfile
+    ports:
+      - '8090:8090'
+    links:
+      - eureka-server:eureka-server
+      - configuration-server:configuration-server
+    depends_on:
+      - configuration-server
+      - eureka-server
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
+            - "EUREKA_URL=http://eureka-server:8761/eureka"
+  
+  kangaroo2:
+    container_name: kangaroo2
+    image: 'jr/kangaroo'
+    build:
+        context: ./kangaroo
+        dockerfile: Dockerfile
+    links:
+      - eureka-server:eureka-server
+      - configuration-server:configuration-server
+    depends_on:
+      - configuration-server
+      - eureka-server
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
+            - "EUREKA_URL=http://eureka-server:8761/eureka"
+
+  golden:
+    container_name: golden
+    image: 'jr/golden'
+    build:
+        context: ./golden
+        dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+            - configuration-server
+            - eureka-server
+    links:
+      - eureka-server:eureka-server
+      - configuration-server:configuration-server
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
+
+  configuration-server:
+    container_name: configuration-server
+    image: 'jr/configuration-server'
+    build:
+        context: ./configuration-service
+        dockerfile: Dockerfile
+    ports:
+      - '8888:8888'
+    links:
+      - eureka-server:eureka-server
+    networks:
+      - micro
+
+  eureka-server:
+    container_name: eureka-server
+    build:
+        context: ./eureka-server
+        dockerfile: Dockerfile
+    image: 'jr/eureka-server'
+    ports:
+      - '8761:8761'
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+  
+  zuul-api-gateway:
+    container_name: zuul-api-gateway
+    build:
+        context: ./zuul-api-gateway
+        dockerfile: Dockerfile
+    image: 'jr/zuul-api-gateway'
+    links:
+      - eureka-server:eureka-server
+      - configuration-server:configuration-server
+      - golden:golden
+      - kangaroo:kangaroo
+    ports:
+      - '8181:8181'
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
+
+networks:
+  micro:
+    driver: bridge
+
+
