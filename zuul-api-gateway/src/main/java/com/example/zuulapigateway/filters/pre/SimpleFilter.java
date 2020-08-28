@@ -32,8 +32,7 @@ public class SimpleFilter extends ZuulFilter {
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
-        LOGGER.info("Zuul PRE filter");
-        LOGGER.info("{} request to {}", request.getMethod(), request.getRequestURL());
+        LOGGER.info("Zuul PRE filter: {} request to {}", request.getMethod(), request.getRequestURL());
 
         return null;
     }

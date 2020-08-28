@@ -16,6 +16,9 @@ public class ZuulApiGatewayApplication {
         SpringApplication.run(ZuulApiGatewayApplication.class, args);
     }
 
+    /**
+     * Ejemplo filtros con Zuul
+     */
     @Bean
     public SimpleFilter simpleFilter() {
         return new SimpleFilter();

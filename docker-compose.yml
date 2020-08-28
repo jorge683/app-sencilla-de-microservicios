@@ -1,6 +1,27 @@
 version: '3.3'
 services:
 
+  golden:
+    container_name: golden
+    image: 'jr/golden'
+    build:
+        context: ./golden
+        dockerfile: Dockerfile
+    ports:
+      - '8080:8080'
+    depends_on:
+            - configuration-server
+            - eureka-server
+    links:
+      - eureka-server:eureka-server
+      - configuration-server:configuration-server
+    networks:
+      - micro
+    environment:
+            - "spring.cloud.config.uri=http://configuration-server:8888/"
+            - "SPRING_PROFILES_ACTIVE=dev"
+            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
+
   kangaroo:
     container_name: kangaroo
     image: 'jr/kangaroo'
@@ -12,6 +33,7 @@ services:
     links:
       - eureka-server:eureka-server
       - configuration-server:configuration-server
+      - golden:golden
     depends_on:
       - configuration-server
       - eureka-server
@@ -43,26 +65,6 @@ services:
             - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
             - "EUREKA_URL=http://eureka-server:8761/eureka"
 
-  golden:
-    container_name: golden
-    image: 'jr/golden'
-    build:
-        context: ./golden
-        dockerfile: Dockerfile
-    ports:
-      - '8080:8080'
-    depends_on:
-            - configuration-server
-            - eureka-server
-    links:
-      - eureka-server:eureka-server
-      - configuration-server:configuration-server
-    networks:
-      - micro
-    environment:
-            - "spring.cloud.config.uri=http://configuration-server:8888/"
-            - "SPRING_PROFILES_ACTIVE=dev"
-            - "WAIT_HOSTS=configuration-server:8888,eureka-server:8761"
 
   configuration-server:
     container_name: configuration-server
